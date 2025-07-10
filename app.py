@@ -4,14 +4,16 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 from PIL import Image
-import io
+import requests
+import os
 
 st.set_page_config(
     page_title="Teeth Disease Classifier",
-    page_icon="??",
+    page_icon="🦷",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
+
 st.markdown("""
     <style>
     .main {
@@ -37,18 +39,25 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="title">?? Teeth Disease Classification</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">🦷 Teeth Disease Classification</div>', unsafe_allow_html=True)
 st.write("Upload a teeth image and get the predicted disease with confidence score.")
 
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("Final_teeth_model.h5")
+    file_url = "https://drive.google.com/uc?export=download&id=1b37PRWqhAd_hVUpq3GtWMztaxhrZwqzd"
+    model_path = "Final_teeth_model.h5"
+    
+    if not os.path.exists(model_path):
+        with open(model_path, "wb") as f:
+            f.write(requests.get(file_url).content)
+
+    return tf.keras.models.load_model(model_path)
 
 model = load_model()
 
 class_names = ['MC', 'OLP', 'Gum', 'CoS', 'OT', 'CaS', 'OC']
 
-uploaded_file = st.file_uploader("?? Upload an image...", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("🖼️ Upload an image...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     img = Image.open(uploaded_file).convert("RGB")
@@ -61,8 +70,5 @@ if uploaded_file is not None:
     pred_class = class_names[np.argmax(predictions)]
     confidence = float(np.max(predictions)) * 100
 
-    st.success(f"?? **Predicted Disease:** {pred_class}")
-    st.info(f"?? **Confidence:** {confidence:.2f}%")
-
-
-
+    st.success(f"🩺 **Predicted Disease:** {pred_class}")
+    st.info(f"📊 **Confidence:** {confidence:.2f}%")
