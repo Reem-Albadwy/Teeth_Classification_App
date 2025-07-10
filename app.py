@@ -27,7 +27,7 @@ def load_model():
 
 model = load_model()
 
-class_names = ['MC', 'OLP', 'Gum', 'CoS', 'OT', 'CaS', 'OC']
+class_names = ['OC', 'CaS', 'OT', 'CoS', 'Gum', 'MC', 'OLP']
 
 uploaded_file = st.file_uploader("🖼️ Upload an image...", type=["jpg", "jpeg", "png"])
 
