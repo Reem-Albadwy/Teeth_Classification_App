@@ -1,12 +1,9 @@
-# Force Streamlit to rebuild the app
 import streamlit as st
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 from PIL import Image
-import requests
 import os
-import zipfile
 
 st.set_page_config(
     page_title="Teeth Disease Classifier",
@@ -45,19 +42,11 @@ st.write("Upload a teeth image and get the predicted disease with confidence sco
 
 @st.cache_resource
 def load_model():
-    zip_url = "https://drive.google.com/uc?export=download&id=1cPSIi0rgKVXDaID4n4QXXskf9Izt8yXh"
-    zip_path = "SavedModel_format.zip"
-    extract_path = "SavedModel_format"
-
-    # Download zip if not exists
-    if not os.path.exists(extract_path):
-        with open(zip_path, "wb") as f:
-            f.write(requests.get(zip_url).content)
-        # Extract zip
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_path)
-
-    return tf.keras.models.load_model(extract_path)
+    model_path = "SavedModel_format"
+    if not os.path.exists(model_path):
+        st.error("Model folder not found!")
+        return None
+    return tf.keras.models.load_model(model_path, compile=False)  # important: compile=False
 
 model = load_model()
 
@@ -65,10 +54,10 @@ class_names = ['MC', 'OLP', 'Gum', 'CoS', 'OT', 'CaS', 'OC']
 
 uploaded_file = st.file_uploader("🖼️ Upload an image...", type=["jpg", "jpeg", "png"])
 
-if uploaded_file is not None:
+if uploaded_file is not None and model is not None:
     img = Image.open(uploaded_file).convert("RGB")
     st.image(img, caption="Uploaded Image", use_column_width=True)
-    img = img.resize((224, 224))  
+    img = img.resize((224, 224))
     img_array = image.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
